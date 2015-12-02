@@ -16,6 +16,8 @@ public class Hackathon {
 	private int				delay;
 	private float			glowSpeed;
 	private ButtonSensor	button;
+	private boolean 		buttonState;
+	private int            curtainThreshold;
 	
 	
 	public Hackathon () {
@@ -24,9 +26,11 @@ public class Hackathon {
 		name    	= "Elsie";
 		grovePi 	= new GrovePi();
 		button      = grovePi.getDeviceFactory().createButtonSensor(Pin.DIGITAL_PIN_5);
+		buttonState = false;
 		lcd 		= grovePi.getDeviceFactory().createRgbLcdDisplay();
 		delay 		= 1000;
-		glowSpeed   = 0.6f;
+		glowSpeed   = 2.5f;
+		curtainThreshold = (1024/2);
 		
 		// initialise the display
 		lcd.display(true);
@@ -39,15 +43,16 @@ public class Hackathon {
 	
 	public void displayMessage(String message) {
 		lcd.setText(message);
-		int polarity = 2;
+		float displaySpeed = 2.0f;
 		int count = 0;
 		for (int i = 0; i < delay; i++) {
+			count += displaySpeed;
 			if (count >= 255) {
 				count = 255;
-				polarity = -2;
+				displaySpeed = -displaySpeed;
 			} else if (count <= 0) {
 				count = 0;
-				polarity = 2;
+				displaySpeed = -displaySpeed;
 			}
 			lcd.setBacklightRgb(127, count, 127);
 		}
@@ -76,18 +81,25 @@ public class Hackathon {
 			// change polarity of glowspeed (ensure that it stays within
 			// 0 - 255 range
 			f += glowSpeed;
-			System.out.println(f);
 			if (f > 255 || f < 0) {
+				f -= glowSpeed; // this prevents a flicker!
 				glowSpeed = -glowSpeed;
 			}
 			
-			// check if button is pressed
-			if (button.isPressed()) {
-				isAvailable = true;
-			} else {
+			// check if curtains are open
+			if (grovePi.analogRead(Pin.ANALOG_PIN_0) < curtainThreshold) {
 				isAvailable = false;
+			} else {
+				isAvailable = true;
 			}
 			
+			// poll api!
+			if (button.isPressed() && !buttonState) {
+				buttonState = true;
+				pollApi();
+			} else {
+				buttonState = false;
+			}
 			
 		}
 	}
