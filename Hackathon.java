@@ -8,6 +8,7 @@ import java.net.*;
 import java.io.*;
 
 
+
 public class Hackathon {
 
 	// contains a list of messages to display
@@ -22,7 +23,7 @@ public class Hackathon {
 	private boolean 		buttonState;
 	private int            curtainThreshold;
 	private String			apiUrl;
-
+	private Thread 			httpThread;
 
 	public Hackathon () {
 		messages 	= new LinkedList<String>();
@@ -43,9 +44,13 @@ public class Hackathon {
 	}
 
 	public void pollApi() {
-		Thread t = new Thread(new HttpRequest);
-
-
+		httpThread = new Thread(new HttpRequest(apiUrl));
+		httpThread.start();
+		Thread geoffThread = new Thread(new HttpRequest(apiUrl));
+		geoffThread.start();
+		Thread anotherThread = new Thread(new HttpRequest(apiUrl));
+		anotherThread.start();
+		/*
 		try {
 			URLConnection connection = new URL(apiUrl).openConnection();
 			connection.connect();
@@ -66,6 +71,7 @@ public class Hackathon {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		*/
 	}
 
 	public void pushToApi(String event) {
