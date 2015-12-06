@@ -3,17 +3,15 @@ import grovepi.Pin;
 import grovepi.sensors.*;
 import grovepi.i2c_devices.RgbLcdDisplay;
 import java.util.Queue;
+import java.util.List;
 import java.util.LinkedList;
-import java.net.*;
-import java.io.*;
-
-
+import java.util.ArrayList;
 
 public class Hackathon {
 
 	// contains a list of messages to display
 	private Queue<String>	messages;
-	private boolean		isAvailable;
+	private boolean		    isAvailable;
 	private String			name;
 	private GrovePi			grovePi;
 	private RgbLcdDisplay	lcd;
@@ -21,9 +19,9 @@ public class Hackathon {
 	private float			glowSpeed;
 	private ButtonSensor	button;
 	private boolean 		buttonState;
-	private int            curtainThreshold;
+	private int             curtainThreshold;
 	private String			apiUrl;
-	private Thread 			httpThread;
+	private List<Thread>    httpThreads;
 
 	public Hackathon () {
 		messages 	= new LinkedList<String>();
@@ -37,6 +35,7 @@ public class Hackathon {
 		glowSpeed   = 2.5f;
 		curtainThreshold = (1024/2);
 		apiUrl      = "http://www.google.co.uk";
+		httpThreads = new ArrayList<Thread>();
 
 		// initialise the display
 		lcd.display(true);
@@ -44,12 +43,10 @@ public class Hackathon {
 	}
 
 	public void pollApi() {
-		httpThread = new Thread(new HttpRequest(apiUrl));
-		httpThread.start();
-		Thread geoffThread = new Thread(new HttpRequest(apiUrl));
-		geoffThread.start();
-		Thread anotherThread = new Thread(new HttpRequest(apiUrl));
-		anotherThread.start();
+		httpThreads.add(new Thread(new HttpRequest(apiUrl)));
+		httpThreads.add(new Thread(new HttpRequest(apiUrl)));
+		httpThreads.add(new Thread(new HttpRequest(apiUrl)));
+		
 		/*
 		try {
 			URLConnection connection = new URL(apiUrl).openConnection();
@@ -101,7 +98,17 @@ public class Hackathon {
 		float f = 0;
 
 		while (true) {
-
+			//// check for any finished httpThreads
+			//for (int i = 0; i < httpThreads.size(); i++) {
+			//	if (!httpThreads.get(i).isAlive()) {
+			//		HttpRequest r = httpThreads.get(i).currentThread();
+			//		Queue<String> msgs = r.getMessages();
+			//		for (String s: msgs) {
+			//			displayMessage(s);
+			//		}
+			//	}
+			//}
+			
 			// check message queue, if there is a message, display it!
 			String message = messages.poll();
 			if (message != null) {
