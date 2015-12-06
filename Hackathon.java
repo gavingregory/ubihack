@@ -4,6 +4,9 @@ import grovepi.sensors.*;
 import grovepi.i2c_devices.RgbLcdDisplay;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.net.*;
+import java.io.*;
+
 
 public class Hackathon {
 
@@ -18,6 +21,7 @@ public class Hackathon {
 	private ButtonSensor	button;
 	private boolean 		buttonState;
 	private int            curtainThreshold;
+	private String			apiUrl;
 	
 	
 	public Hackathon () {
@@ -31,6 +35,7 @@ public class Hackathon {
 		delay 		= 1000;
 		glowSpeed   = 2.5f;
 		curtainThreshold = (1024/2);
+		apiUrl      = "http://www.google.co.uk";
 		
 		// initialise the display
 		lcd.display(true);
@@ -38,7 +43,29 @@ public class Hackathon {
 	}
 
 	public void pollApi() {
-		messages.add("You have received a new message");
+		Thread t = new Thread(new HttpRequest);
+		
+		
+		try {
+			URLConnection connection = new URL(apiUrl).openConnection();
+			connection.connect();
+			InputStream in = connection.getInputStream();
+			try {
+				java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
+				String m = s.hasNext() ? s.next() : null;
+				if (m != null) {
+					messages.add(m);
+					messages.add(m);
+					messages.add(m);
+					messages.add(m);
+					messages.add(m);
+				}
+			} finally {
+				in.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void pushToApi(String event) {
@@ -88,6 +115,8 @@ public class Hackathon {
 			if (f > 255 || f < 0) {
 				f -= glowSpeed; // this prevents a flicker!
 				glowSpeed = -glowSpeed;
+				pollApi();
+				System.out.println("polling API ...");
 			}
 			
 			// check if curtains are open
