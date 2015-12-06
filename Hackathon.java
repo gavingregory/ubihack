@@ -22,8 +22,8 @@ public class Hackathon {
 	private boolean 		buttonState;
 	private int            curtainThreshold;
 	private String			apiUrl;
-	
-	
+
+
 	public Hackathon () {
 		messages 	= new LinkedList<String>();
 		isAvailable	= false;
@@ -36,7 +36,7 @@ public class Hackathon {
 		glowSpeed   = 2.5f;
 		curtainThreshold = (1024/2);
 		apiUrl      = "http://www.google.co.uk";
-		
+
 		// initialise the display
 		lcd.display(true);
 		displayMessage("Good Morning, " + name);
@@ -44,8 +44,8 @@ public class Hackathon {
 
 	public void pollApi() {
 		Thread t = new Thread(new HttpRequest);
-		
-		
+
+
 		try {
 			URLConnection connection = new URL(apiUrl).openConnection();
 			connection.connect();
@@ -67,11 +67,11 @@ public class Hackathon {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void pushToApi(String event) {
 		// TODO: push to the API
 	}
-	
+
 	public void displayMessage(String message) {
 		lcd.setText(message);
 		float displaySpeed = 2.0f;
@@ -91,24 +91,24 @@ public class Hackathon {
 	}
 
 	public void run() {
-		
+
 		float f = 0;
-		
+
 		while (true) {
-			
+
 			// check message queue, if there is a message, display it!
 			String message = messages.poll();
 			if (message != null) {
 				displayMessage(message);
 			}
-			
+
 			// set backlight colour, red/green depending on isAvailable
 			if (isAvailable) {
 				lcd.setBacklightRgb(0,(int)f,0);
 			} else {
 				lcd.setBacklightRgb((int)f,0,0);
 			}
-			
+
 			// change polarity of glowspeed (ensure that it stays within
 			// 0 - 255 range
 			f += glowSpeed;
@@ -118,14 +118,14 @@ public class Hackathon {
 				pollApi();
 				System.out.println("polling API ...");
 			}
-			
+
 			// check if curtains are open
 			if (grovePi.analogRead(Pin.ANALOG_PIN_0) < curtainThreshold) {
 				isAvailable = false;
 			} else {
 				isAvailable = true;
 			}
-			
+
 			// poll api!
 			if (button.isPressed() && !buttonState) {
 				buttonState = true;
@@ -133,7 +133,7 @@ public class Hackathon {
 			} else {
 				buttonState = false;
 			}
-			
+
 		}
 	}
 
