@@ -41,6 +41,10 @@ public class Hackathon {
 		messages.add("You have received a new message");
 	}
 	
+	public void pushToApi(String event) {
+		// TODO: push to the API
+	}
+	
 	public void displayMessage(String message) {
 		lcd.setText(message);
 		float displaySpeed = 2.0f;
@@ -108,8 +112,6 @@ public class Hackathon {
 		Hackathon h = new Hackathon();
 		h.pollApi();
 		h.run();
-		
-		
 	}
 
 }
