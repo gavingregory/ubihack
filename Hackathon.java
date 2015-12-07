@@ -1,6 +1,7 @@
 import grovepi.GrovePi;
 import grovepi.Pin;
 import grovepi.sensors.*;
+import grovepi.*;
 import grovepi.i2c_devices.RgbLcdDisplay;
 import java.util.Queue;
 import java.util.LinkedList;
@@ -18,7 +19,10 @@ public class Hackathon {
 	private ButtonSensor	button;
 	private boolean 		buttonState;
 	private int            curtainThreshold;
-	
+	private TemperatureAndHumiditySensor	humidSense; // Humidity sensor
+	private float	currentHumidity;	//Stores current humidity
+	private float	baseHumidity;	//Stores initial humidity
+	private float	tempHumid;	//Stores temp humidity to calculate averages
 	
 	public Hackathon () {
 		messages 	= new LinkedList<String>();
@@ -31,6 +35,7 @@ public class Hackathon {
 		delay 		= 1000;
 		glowSpeed   = 2.5f;
 		curtainThreshold = (1024/2);
+		humidSense 	= grovePi.getDeviceFactory().createTemperatureAndHumiditySensor(Pin.DIGITAL_PIN_4); //NEW
 		
 		// initialise the display
 		lcd.display(true);
@@ -67,6 +72,15 @@ public class Hackathon {
 		
 		float f = 0;
 		
+		//Store base Humidity
+			for (int i=0; i<5; i++)	{
+			humidSense.update();
+			tempHumid += humidSense.getHumidity();
+			//System.out.println("temp Humidity: " + tempHumid);
+		}
+		baseHumidity = (tempHumid / 5);	//Find the average room humidity
+		//System.out.println("Base Humidity: " + baseHumidity);
+		
 		while (true) {
 			
 			// check message queue, if there is a message, display it!
@@ -97,6 +111,29 @@ public class Hackathon {
 				isAvailable = true;
 			}
 			
+			//Humidity Sensor
+			
+			//Calculate average & compare to initial humidity
+			
+			/* tempHumid = 0;
+			for (int i=0; i<5; i++)	{
+				humidSense.update();
+				tempHumid += humidSense.getHumidity();
+			System.out.println("temp Humidity: " + tempHumid);
+			}
+			currentHumidity = (tempHumid / 5);
+			
+			System.out.println("Humidity: " + currentHumidity);*/
+			
+			
+			//Calculate current humidity & compare to initial
+			humidSense.update();
+			currentHumidity = humidSense.getHumidity();
+			if (currentHumidity > (baseHumidity + (baseHumidity/100*20)))	{
+				System.out.println("KETTLE HAS BOILED");
+				pushToApi("KETTLE HAS BOILED");
+			}
+			
 			// poll api!
 			if (button.isPressed() && !buttonState) {
 				buttonState = true;
@@ -106,6 +143,10 @@ public class Hackathon {
 			}
 			
 		}
+	}
+	
+	public void checkHumid(){
+		
 	}
 
 	public static void main(String[] args) {
