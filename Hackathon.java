@@ -5,26 +5,30 @@ import grovepi.*;
 import grovepi.i2c_devices.RgbLcdDisplay;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.IOException;
 
 public class Hackathon {
 
 	// contains a list of messages to display
-	private Queue<String>	messages;
-	private boolean		isAvailable;
-	private String			name;
-	private GrovePi			grovePi;
-	private RgbLcdDisplay	lcd;
-	private int				delay;
-	private float			glowSpeed;
-	private ButtonSensor	button;
-	private boolean 		buttonState;
+	private Queue<String>  messages;
+	private boolean        isAvailable;
+	private String         name;
+	private GrovePi        grovePi;
+	private RgbLcdDisplay  lcd;
+	private int            delay;
+	private float          glowSpeed;
+	private ButtonSensor   button;
+	private boolean        buttonState;
 	private int            curtainThreshold;
-	private TemperatureAndHumiditySensor	humidSense; // Humidity sensor
-	private float	currentHumidity;	//Stores current humidity
-	private float	baseHumidity;	//Stores initial humidity
-	private float	tempHumid;	//Stores temp humidity to calculate averages
+	private TemperatureAndHumiditySensor  humidSense; // Humidity sensor
+	private float          currentHumidity;	//Stores current humidity
+	private float          baseHumidity;	//Stores initial humidity
+	private float          tempHumid;	//Stores temp humidity to calculate averages
+	private PubSub         pubSub;
 	
-	public Hackathon () {
+	public Hackathon () throws IOException {
 		messages 	= new LinkedList<String>();
 		isAvailable	= false;
 		name    	= "Elsie";
@@ -40,14 +44,20 @@ public class Hackathon {
 		// initialise the display
 		lcd.display(true);
 		displayMessage("Good Morning, " + name);
+		
+		// init pubsub server
+		pubSub = new PubSub();
 	}
 
-	public void pollApi() {
-		messages.add("You have received a new message");
+	public void pollApi() throws IOException {
+		List<StompClient.Message> msgs = pubSub.getMessages();
+		for (StompClient.Message m : msgs) {
+			messages.add(m.getBodyString());  
+		}
 	}
 	
-	public void pushToApi(String event) {
-		// TODO: push to the API
+	public void pushToApi(String message) throws IOException {
+		pubSub.sendMessage(message);
 	}
 	
 	public void displayMessage(String message) {
@@ -68,7 +78,7 @@ public class Hackathon {
 		lcd.setText("");
 	}
 
-	public void run() {
+	public void run() throws IOException {
 		
 		float f = 0;
 		
@@ -80,8 +90,17 @@ public class Hackathon {
 		}
 		baseHumidity = (tempHumid / 5);	//Find the average room humidity
 		//System.out.println("Base Humidity: " + baseHumidity);
+
+		int time = 0;
 		
 		while (true) {
+			
+			// poll the api every so often
+			time += 1;
+			if (time > 510) {
+				time = 0;
+				pollApi();
+			}
 			
 			// check message queue, if there is a message, display it!
 			String message = messages.poll();
@@ -137,22 +156,23 @@ public class Hackathon {
 			// poll api!
 			if (button.isPressed() && !buttonState) {
 				buttonState = true;
-				pollApi();
+				pushToApi("MMM, having a good brew.");
+				System.out.println("sending a brew message");
 			} else {
 				buttonState = false;
 			}
 			
 		}
 	}
-	
-	public void checkHumid(){
-		
-	}
 
 	public static void main(String[] args) {
-		Hackathon h = new Hackathon();
-		h.pollApi();
-		h.run();
+		try {
+			Hackathon h = new Hackathon();
+			h.pollApi();
+			h.run();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
