@@ -5,8 +5,9 @@ This application utilises the Raspberry Pi and GrovePi kit, specifically using t
 
 The basic idea is that the kit allows a user to join a local group of individuals and promote socialising. The kit transmits friendly messages between users when they make cups of tea and stuff :)
 
-Written by:
-Gavin Gregory
-Rorrie Crocker
-Geoff Whitehead
-Alex Child
+| Written by      |
+| --------------- |
+| Gavin Gregory   |
+| Geoff Whitehead |
+| Alex Child      |
+| Rorrie Crocker  |
