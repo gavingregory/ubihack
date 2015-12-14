@@ -14,10 +14,10 @@ public class PubSub {
 	
 	// Constructor
 	public PubSub() throws IOException {
-		host = "stomp.di-test.com";
+		host = "sjmf.in";//"stomp.di-test.com";
 		port = 61613;
-		String login = "ubicomp";
-		String passcode = "raspberry";
+		String login = "pi"; //"ubicomp";
+		String passcode = "raspberry"; //"raspberry";
 		stomp = new StompClient(host, port, login, passcode);
 		group = "/topic/brewtime";
 		hostname = System.getenv("HOSTNAME");
