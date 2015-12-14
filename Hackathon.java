@@ -31,6 +31,7 @@ public class Hackathon {
 	private float          tempHumid;	//Stores temp humidity to calculate averages
 	private PubSub         pubSub;
 	private UltrasonicRangerSensor		range;
+	private float prox;
 	
 	public Hackathon () throws IOException {
 		messages 	= new LinkedList<String>();
@@ -118,7 +119,8 @@ public class Hackathon {
 			}
 			
 			// set backlight colour, red/green depending on isAvailable
-			if (range.getDistance() < 100){
+			if (time % 15 == 0) { prox = range.getDistance();}
+			if (prox< 100){
 				lcd.setBacklightRgb(225,225,225);
 			}
 			else if (isAvailable) {
