@@ -27,6 +27,7 @@ public class Hackathon {
 	private TemperatureAndHumiditySensor  humidSense; // Humidity sensor
 	private float          currentHumidity;	//Stores current humidity
 	private float          baseHumidity;	//Stores initial humidity
+	private boolean 	   kettleBoiled;
 	private float          tempHumid;	//Stores temp humidity to calculate averages
 	private PubSub         pubSub;
 	private UltrasonicRangerSensor		range;
@@ -45,6 +46,8 @@ public class Hackathon {
 		curtainThreshold = (1024/2);
 		humidSense 	= grovePi.getDeviceFactory().createTemperatureAndHumiditySensor(Pin.DIGITAL_PIN_4); //Humid
 		range		= grovePi.getDeviceFactory().createUltraSonicSensor(Pin.DIGITAL_PIN_3);	//Proximity Sensor
+		humidSense 	= grovePi.getDeviceFactory().createTemperatureAndHumiditySensor(Pin.DIGITAL_PIN_4); //NEW
+		kettleBoiled = false;
 		
 		// initialise the display
 		lcd.display(true);
@@ -88,13 +91,12 @@ public class Hackathon {
 		float f = 0;
 		
 		//Store base Humidity
-			for (int i=0; i<5; i++)	{
+		for (int i=0; i<5; i++)	{
 			humidSense.update();
 			tempHumid += humidSense.getHumidity();
 			
 		}
 		baseHumidity = (tempHumid / 5);	//Find the average room humidity
-		
 		int time = 0;
 		
 		while (true) {
@@ -154,12 +156,17 @@ public class Hackathon {
 			
 			
 			//Calculate current humidity & compare to initial
-			humidSense.update();
-			currentHumidity = humidSense.getHumidity();
-			//System.out.println(currentHumidity);
-			if (currentHumidity > (baseHumidity + (baseHumidity/100*10)))	{
-				System.out.println("KETTLE HAS BOILED");
-				pushToApi("KETTLE HAS BOILED");
+			if (time % 30 == 0) { // slowing down the loop speed, so check every 15 iterations
+				humidSense.update();
+				currentHumidity = humidSense.getHumidity();
+				System.out.println(currentHumidity);
+				if (currentHumidity > (baseHumidity + (baseHumidity/100*10)) && !kettleBoiled)	{
+					System.out.println("KETTLE HAS BOILED");
+					pushToApi("KETTLE HAS BOILED");
+					kettleBoiled = true;
+				}
+				// reset kettle when humidity lowers
+				if (currentHumidity < (baseHumidity + (baseHumidity/100*8))) kettleBoiled = false;	
 			}
 			
 			//RangeDetection
@@ -174,7 +181,6 @@ public class Hackathon {
 			} else {
 				buttonState = false;
 			}
-			
 		}
 	}
 
