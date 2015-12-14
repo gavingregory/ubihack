@@ -44,7 +44,6 @@ public class Hackathon {
 		delay 		= 3000;
 		glowSpeed   = 2.5f;
 		curtainThreshold = (1024/2);
-		humidSense 	= grovePi.getDeviceFactory().createTemperatureAndHumiditySensor(Pin.DIGITAL_PIN_4); //Humid
 		range		= grovePi.getDeviceFactory().createUltraSonicSensor(Pin.DIGITAL_PIN_3);	//Proximity Sensor
 		humidSense 	= grovePi.getDeviceFactory().createTemperatureAndHumiditySensor(Pin.DIGITAL_PIN_4); //NEW
 		kettleBoiled = false;
@@ -149,7 +148,7 @@ public class Hackathon {
 				System.out.println(" " + System.currentTimeMillis());
 				System.out.println(currentHumidity);
 				if (currentHumidity > (baseHumidity + (baseHumidity/100*10)) && !kettleBoiled)	{
-				pushToApi(name + " having a good brew.");
+				pushToApi(name + "' boiled, come over!");
 				System.out.println("sending a brew message");
 					kettleBoiled = true;
 				}
@@ -160,7 +159,7 @@ public class Hackathon {
 			// poll api!
 			if (button.isPressed() && !buttonState) {
 				buttonState = true;
-				pushToApi(name + " having a good brew.");
+				pushToApi(name + "' brewing!");
 				System.out.println("sending a brew message");
 			} else {
 				buttonState = false;
