@@ -57,11 +57,11 @@ public class Hackathon {
 			messages.add(m.getBodyString());  
 		}
 	}
-	
+
 	public void pushToApi(String message) throws IOException {
 		pubSub.sendMessage(message);
 	}
-	
+
 	public void displayMessage(String message) {
 		lcd.setText(message);
 		float displaySpeed = 2.0f;
@@ -76,6 +76,10 @@ public class Hackathon {
 				displaySpeed = -displaySpeed;
 			}
 			lcd.setBacklightRgb(127, count, 127);
+		} try {
+			Thread.sleep(3000);	
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		lcd.setText("");
 	}
@@ -146,11 +150,12 @@ public class Hackathon {
 			
 			System.out.println("Humidity: " + currentHumidity);*/
 			
-			
 			//Calculate current humidity & compare to initial
 			if (time % 30 == 0) { // slowing down the loop speed, so check every 15 iterations
+				System.out.print(System.currentTimeMillis());
 				humidSense.update();
 				currentHumidity = humidSense.getHumidity();
+				System.out.println(" " + System.currentTimeMillis());
 				System.out.println(currentHumidity);
 				if (currentHumidity > (baseHumidity + (baseHumidity/100*10)) && !kettleBoiled)	{
 					System.out.println("KETTLE HAS BOILED");
@@ -164,7 +169,7 @@ public class Hackathon {
 			// poll api!
 			if (button.isPressed() && !buttonState) {
 				buttonState = true;
-				pushToApi("MMM, having a good brew.");
+				pushToApi(name + " having a good brew.");
 				System.out.println("sending a brew message");
 			} else {
 				buttonState = false;
