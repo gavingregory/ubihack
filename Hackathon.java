@@ -31,7 +31,6 @@ public class Hackathon {
 	private float          tempHumid;	//Stores temp humidity to calculate averages
 	private PubSub         pubSub;
 	private UltrasonicRangerSensor		range;
-	private float			piprox;
 	
 	public Hackathon () throws IOException {
 		messages 	= new LinkedList<String>();
@@ -116,9 +115,8 @@ public class Hackathon {
 			
 			// set backlight colour, red/green depending on isAvailable
 			if (range.getDistance() < 100){
-				lcd.setBacklightRgb(0,(int)f,0);
+				lcd.setBacklightRgb(225,225,225);
 			}
-			
 			else if (isAvailable) {
 				lcd.setBacklightRgb(0,(int)f,0);
 			} else {
@@ -167,11 +165,7 @@ public class Hackathon {
 				}
 				// reset kettle when humidity lowers
 				if (currentHumidity < (baseHumidity + (baseHumidity/100*8))) kettleBoiled = false;	
-			}
-			
-			//RangeDetection
-			System.out.println(range.getDistance());
-			
+			}			
 			
 			// poll api!
 			if (button.isPressed() && !buttonState) {
