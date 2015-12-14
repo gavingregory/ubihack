@@ -40,7 +40,7 @@ public class Hackathon {
 		button      = grovePi.getDeviceFactory().createButtonSensor(Pin.DIGITAL_PIN_5);
 		buttonState = false;
 		lcd 		= grovePi.getDeviceFactory().createRgbLcdDisplay();
-		delay 		= 1000;
+		delay 		= 3000;
 		glowSpeed   = 2.5f;
 		curtainThreshold = (1024/2);
 		humidSense 	= grovePi.getDeviceFactory().createTemperatureAndHumiditySensor(Pin.DIGITAL_PIN_4); //Humid
@@ -81,10 +81,6 @@ public class Hackathon {
 				displaySpeed = -displaySpeed;
 			}
 			lcd.setBacklightRgb(127, count, 127);
-		} try {
-			Thread.sleep(3000);	
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		lcd.setText("");
 	}
@@ -106,7 +102,7 @@ public class Hackathon {
 			
 			// poll the api every so often
 			time += 1;
-			if (time > 510) {
+			if (time > 255) {
 				time = 0;
 				pollApi();
 			}
@@ -143,21 +139,8 @@ public class Hackathon {
 			}
 			
 			//Humidity Sensor
-			
-			//Calculate average & compare to initial humidity
-			
-			/* tempHumid = 0;
-			for (int i=0; i<5; i++)	{
-				humidSense.update();
-				tempHumid += humidSense.getHumidity();
-			System.out.println("temp Humidity: " + tempHumid);
-			}
-			currentHumidity = (tempHumid / 5);
-			
-			System.out.println("Humidity: " + currentHumidity);*/
-			
-			//Calculate current humidity & compare to initial
 			if (time % 30 == 0) { // slowing down the loop speed, so check every 15 iterations
+				//Calculate current humidity & compare to initial
 				System.out.print(System.currentTimeMillis());
 				humidSense.update();
 				currentHumidity = humidSense.getHumidity();
@@ -169,7 +152,7 @@ public class Hackathon {
 					kettleBoiled = true;
 				}
 				// reset kettle when humidity lowers
-				if (currentHumidity < (baseHumidity + (baseHumidity/100*8))) kettleBoiled = false;	
+				if (currentHumidity < (baseHumidity + (baseHumidity/100*8))) kettleBoiled = false;
 			}			
 			
 			// poll api!
