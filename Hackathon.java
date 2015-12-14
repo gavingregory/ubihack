@@ -148,7 +148,8 @@ public class Hackathon {
 			//Calculate current humidity & compare to initial
 			humidSense.update();
 			currentHumidity = humidSense.getHumidity();
-			if (currentHumidity > (baseHumidity + (baseHumidity/100*20)))	{
+			System.out.println(currentHumidity);
+			if (currentHumidity > (baseHumidity + (baseHumidity/100*10)))	{
 				System.out.println("KETTLE HAS BOILED");
 				pushToApi("KETTLE HAS BOILED");
 			}
