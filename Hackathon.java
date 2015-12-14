@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.IOException;
+import grovepi.sensors.UltrasonicRangerSensor;
+import grovepi.PinMode;
 
 public class Hackathon {
 
@@ -27,6 +29,8 @@ public class Hackathon {
 	private float          baseHumidity;	//Stores initial humidity
 	private float          tempHumid;	//Stores temp humidity to calculate averages
 	private PubSub         pubSub;
+	private UltrasonicRangerSensor		range;
+	private float			piprox;
 	
 	public Hackathon () throws IOException {
 		messages 	= new LinkedList<String>();
@@ -39,7 +43,8 @@ public class Hackathon {
 		delay 		= 1000;
 		glowSpeed   = 2.5f;
 		curtainThreshold = (1024/2);
-		humidSense 	= grovePi.getDeviceFactory().createTemperatureAndHumiditySensor(Pin.DIGITAL_PIN_4); //NEW
+		humidSense 	= grovePi.getDeviceFactory().createTemperatureAndHumiditySensor(Pin.DIGITAL_PIN_4); //Humid
+		range		= grovePi.getDeviceFactory().createUltraSonicSensor(Pin.DIGITAL_PIN_3);	//Proximity Sensor
 		
 		// initialise the display
 		lcd.display(true);
@@ -86,11 +91,10 @@ public class Hackathon {
 			for (int i=0; i<5; i++)	{
 			humidSense.update();
 			tempHumid += humidSense.getHumidity();
-			//System.out.println("temp Humidity: " + tempHumid);
+			
 		}
 		baseHumidity = (tempHumid / 5);	//Find the average room humidity
-		//System.out.println("Base Humidity: " + baseHumidity);
-
+		
 		int time = 0;
 		
 		while (true) {
@@ -109,7 +113,11 @@ public class Hackathon {
 			}
 			
 			// set backlight colour, red/green depending on isAvailable
-			if (isAvailable) {
+			if (range.getDistance() < 100){
+				lcd.setBacklightRgb(0,(int)f,0);
+			}
+			
+			else if (isAvailable) {
 				lcd.setBacklightRgb(0,(int)f,0);
 			} else {
 				lcd.setBacklightRgb((int)f,0,0);
@@ -148,11 +156,15 @@ public class Hackathon {
 			//Calculate current humidity & compare to initial
 			humidSense.update();
 			currentHumidity = humidSense.getHumidity();
-			System.out.println(currentHumidity);
+			//System.out.println(currentHumidity);
 			if (currentHumidity > (baseHumidity + (baseHumidity/100*10)))	{
 				System.out.println("KETTLE HAS BOILED");
 				pushToApi("KETTLE HAS BOILED");
 			}
+			
+			//RangeDetection
+			System.out.println(range.getDistance());
+			
 			
 			// poll api!
 			if (button.isPressed() && !buttonState) {
