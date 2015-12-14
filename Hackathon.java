@@ -35,7 +35,7 @@ public class Hackathon {
 	public Hackathon () throws IOException {
 		messages 	= new LinkedList<String>();
 		isAvailable	= false;
-		name    	= "Elsie";
+		name    	= "Geoffrey";
 		grovePi 	= new GrovePi();
 		button      = grovePi.getDeviceFactory().createButtonSensor(Pin.DIGITAL_PIN_5);
 		buttonState = false;
@@ -147,8 +147,8 @@ public class Hackathon {
 				System.out.println(" " + System.currentTimeMillis());
 				System.out.println(currentHumidity);
 				if (currentHumidity > (baseHumidity + (baseHumidity/100*10)) && !kettleBoiled)	{
-					System.out.println("KETTLE HAS BOILED");
-					pushToApi("KETTLE HAS BOILED");
+				pushToApi(name + " having a good brew.");
+				System.out.println("sending a brew message");
 					kettleBoiled = true;
 				}
 				// reset kettle when humidity lowers
